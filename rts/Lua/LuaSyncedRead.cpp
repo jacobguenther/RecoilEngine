@@ -941,7 +941,13 @@ int LuaSyncedRead::GetTidal(lua_State* L)
  *
  * @function Spring.GetWind
  *
+ * @return number windVecX
+ * @return number windVecY
+ * @return number windVecZ
  * @return number windStrength
+ * @return number windDirX
+ * @return number windDirY
+ * @return number windDirZ
  */
 int LuaSyncedRead::GetWind(lua_State* L)
 {
