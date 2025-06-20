@@ -4724,11 +4724,14 @@ int LuaOpenGL::MultiTexGen(lua_State* L)
 /***
  * @function gl.BindImageTexture
  * @param unit integer
- * @param texID string?
- * @param level integer?
- * @param layer integer?
- * @param access integer?
- * @param format integer?
+ * @param texID string
+ * @param level integer
+ * @param layer nil | integer (nil binds the entire array, an integer binds a specific layer)
+ * @param access integer (GL.READ_ONLY | GL.WRITE_ONLY | GL.READ_WRITE)
+ * @param format integer (Example: GL.TEXTURE_2D)
+ * 
+ * Refer to https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindImageTexture.xhtml
+ * for parameters
  */
 int LuaOpenGL::BindImageTexture(lua_State* L)
 {
