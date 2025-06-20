@@ -4724,14 +4724,28 @@ int LuaOpenGL::MultiTexGen(lua_State* L)
 /***
  * @function gl.BindImageTexture
  * @param unit integer
- * @param texID string
- * @param level integer
- * @param layer nil | integer (nil binds the entire array, an integer binds a specific layer)
- * @param access integer (GL.READ_ONLY | GL.WRITE_ONLY | GL.READ_WRITE)
- * @param format integer (Example: GL.TEXTURE_2D)
+ * @param texID nil | string (nil breaks any existing bind to the image unit)
+ * @param level integer (Default: 0)
+ * @param layer nil | integer (nil binds the texture, an integer binds a specific layer, ignored if the texture does not support layered bindings)
+ * @param access integer (Default: GL.READ_WRITE, can be any of GL.READ_ONLY | GL.WRITE_ONLY | GL.READ_WRITE)
+ * @param format integer (Example: GL.RGBA16F)
  * 
- * Refer to https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindImageTexture.xhtml
- * for parameters
+ * For parameters refer to
+ * https://registry.khronos.org/OpenGL-Refpages/gl4/html/glBindImageTexture.xhtml
+ * and
+ * https://github.com/beyond-all-reason/RecoilEngine/blob/206fd62ed61dc4da1aa7594d309cb4330a656b07/rts/Lua/LuaConstGL.cpp
+ * 
+ * Example uses
+ * local my_texture_id = gl.CreateTexture(...)
+ * 
+ * -- bind layer 0 of my_texture_id if it supports layered bindings
+ * gl.BindImageTexture(0, my_texture_id, 0, 0, GL.READ_WRITE, GL.RGBA16F)
+ * 
+ * -- bind all layers of my_texture_id if it supports layered bindings
+ * gl.BindImageTexture(0, my_texture_id, 0, nil, GL.READ_WRITE, GL.RGBA16F)
+ * 
+ * -- unbind unit 0
+ * gl.BindImageTexture(0)
  */
 int LuaOpenGL::BindImageTexture(lua_State* L)
 {
@@ -4785,7 +4799,7 @@ int LuaOpenGL::BindImageTexture(lua_State* L)
 
 	++argNum;
 	//access
-	GLenum access = luaL_optnumber(L, argNum, 0);
+	GLenum access = luaL_optnumber(L, argNum, GL_READ_WRITE);
 	if (access != GL_READ_ONLY && access != GL_WRITE_ONLY && access != GL_READ_WRITE)
 		luaL_error(L, "%s Invalid access specified %d. The access must be GL_READ_ONLY or GL_WRITE_ONLY or GL_READ_WRITE.", __func__, access);
 
@@ -4835,7 +4849,11 @@ int LuaOpenGL::BindImageTexture(lua_State* L)
 	case GL_R8_SNORM:
 		break; //valid
 	default:
-		luaL_error(L, "%s Invalid format specified %d", __func__, format);
+		if (texID == 0) {
+			format = 0;
+		} else {
+			luaL_error(L, "%s Invalid format specified %d", __func__, format);
+		}
 		break;
 	}
 
